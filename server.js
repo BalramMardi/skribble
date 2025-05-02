@@ -10,7 +10,8 @@ const server = http.createServer(app);
 const io = new Server(server, {
   pingTimeout: 60000,
   cors: {
-    origin: "http://localhost:3000",
+    origin: "https://skribble-y6e2.onrender.com/",
+    methods: ["GET", "POST"],
     // origin: "*"
   },
   connectionStateRecovery: {},

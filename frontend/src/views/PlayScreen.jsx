@@ -42,11 +42,7 @@ function PlayScreen() {
       navigate("/");
       return;
     }
-    const newSocket = io.connect(
-      process.env.REACT_APP_NODE_ENV === "production"
-        ? ENDPOINT
-        : ENDPOINT_LOCAL
-    );
+    const newSocket = io.connect(ENDPOINT);
     // console.log(newSocket);
     setSocket(newSocket);
     // newSocket.emit("player-joined",newSocket.id)
