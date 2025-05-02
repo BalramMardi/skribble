@@ -30,34 +30,36 @@ function PlayScreen() {
   const [showClock, setShowClock] = useState(false);
   const [wordLen, setWordLen] = useState(0);
   const [guessedWord, setGuessedWord] = useState(false);
-  const navigate = useNavigate()
-  const location = useLocation()
+  const navigate = useNavigate();
+  const location = useLocation();
   const userDataRecieved = location.state || {};
-  const ENDPOINT = "https://skribblay-you.onrender.com/";
+  const ENDPOINT = "https://skribble-y6e2.onrender.com";
   const ENDPOINT_LOCAL = "http://localhost:3001/";
   useEffect(() => {
-    console.log("user Data revcievd", userDataRecieved)
-    let us = localStorage.getItem("username")
-    if(!us || !userDataRecieved.username || !userDataRecieved.avatar){
-      navigate("/")
+    console.log("user Data revcievd", userDataRecieved);
+    let us = localStorage.getItem("username");
+    if (!us || !userDataRecieved.username || !userDataRecieved.avatar) {
+      navigate("/");
       return;
     }
-    const newSocket = io.connect(process.env.REACT_APP_NODE_ENV === "production"
-    ? ENDPOINT
-    : ENDPOINT_LOCAL, );
+    const newSocket = io.connect(
+      process.env.REACT_APP_NODE_ENV === "production"
+        ? ENDPOINT
+        : ENDPOINT_LOCAL
+    );
     // console.log(newSocket);
     setSocket(newSocket);
     // newSocket.emit("player-joined",newSocket.id)
 
-    window.onbeforeunload=()=>{
+    window.onbeforeunload = () => {
       localStorage.removeItem("username");
     };
-    return()=>{
-      if(newSocket){
-      newSocket.disconnect();
+    return () => {
+      if (newSocket) {
+        newSocket.disconnect();
       }
-      localStorage.removeItem("username")
-    }
+      localStorage.removeItem("username");
+    };
   }, []);
 
   useEffect(() => {
@@ -69,19 +71,18 @@ function PlayScreen() {
     }
   }, [socket]);
 
-  useEffect(()=>{
-    if(socket){
-      socket.on("send-user-data",()=>{
-        console.log("sending user data")
-        let userdata= {
+  useEffect(() => {
+    if (socket) {
+      socket.on("send-user-data", () => {
+        console.log("sending user data");
+        let userdata = {
           username: userDataRecieved.username,
-          avatar: userDataRecieved.avatar
-        }
-        socket.emit("recieve-user-data",userdata)
-      })
+          avatar: userDataRecieved.avatar,
+        };
+        socket.emit("recieve-user-data", userdata);
+      });
     }
-
-  },[socket])
+  }, [socket]);
 
   useEffect(() => {
     if (socket) {
@@ -605,7 +606,9 @@ function PlayScreen() {
                     : ""
                 }`}
                 onChange={(e) => handleChangeText(e)}
-                disabled={currentUserDrawing || showWords || !gameStarted || guessedWord}
+                disabled={
+                  currentUserDrawing || showWords || !gameStarted || guessedWord
+                }
               ></input>
             </form>
             {allChats &&
