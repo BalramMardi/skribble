@@ -42,10 +42,10 @@ function PlayScreen() {
       navigate("/");
       return;
     }
-    const newSocket = io.connect(ENDPOINT);
-    // console.log(newSocket);
+    const newSocket = io.connect(ENDPOINT, {
+      transports: ["websocket"],
+    });
     setSocket(newSocket);
-    // newSocket.emit("player-joined",newSocket.id)
 
     window.onbeforeunload = () => {
       localStorage.removeItem("username");
@@ -82,28 +82,7 @@ function PlayScreen() {
 
   useEffect(() => {
     if (socket) {
-      //  socket.on("drawing", ({ x0, y0, x1, y1, color })=>{
-      //   // drawLine(context, x0, y0, x1, y1, color, false);
-      //  })
       socket.on("receiving", async (data) => {
-        //   console.log(data)
-        // console.log("data recieved in frontend")
-
-        //   const offsetX=data.x
-        //   const offsetY=data.y
-
-        // await context.lineTo(offsetX, offsetY);
-        // await context.stroke();
-
-        // await context.beginPath();
-        // await context.arc(offsetX, offsetY,5,0,Math.PI*2)
-        // await context.fill()
-        // // context.stroke()
-        // await context.beginPath();
-        // await context.moveTo(offsetX, offsetY)
-        // await context.stroke()
-        // await context.beginPath()
-
         const base64String = data.split(",")[1];
         const buffer = Buffer.from(base64String, "base64");
         const byteArray = new Uint8Array(buffer);
@@ -112,7 +91,6 @@ function PlayScreen() {
 
         const img = new Image();
         img.onload = () => {
-          // if(context){
           context.clearRect(
             0,
             0,
@@ -120,14 +98,10 @@ function PlayScreen() {
             canvasRef.current.height
           );
           context.drawImage(img, 0, 0);
-          // }
         };
         img.src = imageUrl;
       });
     }
-    //  return()=>{
-    //   socket.disconnect()
-    //  }
   }, [socket]);
 
   useEffect(() => {
@@ -141,8 +115,8 @@ function PlayScreen() {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
     ctx.lineCap = "round";
-    ctx.lineWidth = radius; // Set initial radius
-    ctx.strokeStyle = color; // Set initial color
+    ctx.lineWidth = radius;
+    ctx.strokeStyle = color;
     setContext(ctx);
   }, [color, radius]);
   useEffect(() => {
@@ -179,9 +153,8 @@ function PlayScreen() {
       socket.on("start-turn", (player) => {
         console.log("turn started of", player);
         setGuessedWord(false);
-        clearCanvasAfterTurn(); // setPlayerDrawing(player)
+        clearCanvasAfterTurn();
         setPlayerDrawing(player);
-        //getwiords function call
         let newRandomWords = getRandomWords();
         setWords(newRandomWords);
         setShowWords(true);
@@ -204,8 +177,8 @@ function PlayScreen() {
         console.log("drawing started of", player);
         setShowWords(false);
         setShowClock(true);
-        clearCanvasAfterTurn(); // setPlayerDrawing(player)
-        // setPlayerDrawing(player)
+        clearCanvasAfterTurn();
+
         if (player.id === socket.id) {
           console.log("your turn started");
           setCurrentUserDrawing(true);
@@ -244,10 +217,7 @@ function PlayScreen() {
         console.log(msg, player, rightGuess, players);
         setAllPlayer(players);
         if (rightGuess) {
-          // will be adding an attr to chat object later for the green colour
-          // one option that can be further explored is that push the messages in efrontend withut sending all chats from the backend
           if (player.id === socket.id) {
-            // chats.pop();
             setGuessedWord(true);
             setAllChats((prevchats) => [
               {
@@ -269,16 +239,6 @@ function PlayScreen() {
           }
         } else {
           if (player.id === socket.id) {
-            // allChats.push({sender: "you", message: inputMessage})
-            // setAllChats([...allChats, {sender: "you", message: inputMessage}])
-            // console.log(allChats)
-            // allChats.push({sender: "you", message: msg})
-            // let newChats = [...allChats]
-            // console.log(newChats)
-            // let newChat = {sender: "you", message: msg}
-            // newChats.push(newChat)
-            // console.log(newChats)
-            // setAllChats(newChats)
             setAllChats((prevchats) => [
               { sender: "you", message: msg, rightGuess },
               ...prevchats,
@@ -290,18 +250,9 @@ function PlayScreen() {
             ]);
           }
         }
-        // setAllChats(chats.reverse());
       });
     }
   }, [socket]);
-
-  // useEffect(()=>{
-  //     if(socket){
-  //       socket.on("right-guess",()=>{
-  //         console.log("Congratulations! you guessed the right word")
-  //       })
-  //     }
-  // },[socket])
 
   const startPaint = (event) => {
     if (!currentUserDrawing) return;
@@ -339,7 +290,6 @@ function PlayScreen() {
   };
 
   const getCoordinates = (event) => {
-    // const canvas = canvasRef.current;
     return {
       x: event.pageX - canvasRef.current.offsetLeft,
       y: event.pageY - canvasRef.current.offsetTop,
@@ -347,11 +297,8 @@ function PlayScreen() {
   };
 
   const drawLine = async (position) => {
-    // const canvas = canvasRef.current;
-    // const context = canvas.getContext('2d');
-    // if (context) {
-    context.strokeStyle = color; // Set the stroke style to the current color
-    context.beginPath(); // Start a new path for each line segment
+    context.strokeStyle = color;
+    context.beginPath();
     context.moveTo(mousePosition.x, mousePosition.y);
     context.lineTo(position.x, position.y);
     context.lineWidth = radius;
@@ -364,8 +311,7 @@ function PlayScreen() {
       { start: mousePosition, end: position, color, radius },
     ];
     setLines(newLines);
-    setMousePosition(position); // Update mouse position
-    // }
+    setMousePosition(position);
   };
   const handleMouseUp = (event) => {
     if (straightLineMode && startPoint) {
@@ -375,18 +321,8 @@ function PlayScreen() {
   };
 
   const drawStraightLine = async (event) => {
-    // const canvas = canvasRef.current;
-    // const context = canvas.getContext('2d');
-
-    // Handle potential errors (optional)
-    // if (!canvas || !context) {
-    //   console.error('Canvas or context unavailable for drawing line.');
-    //   return;
-    // }
-
-    // Check if straight line mode is enabled and startPoint is set
     if (straightLineMode && startPoint) {
-      const endPoint = getCoordinates(event); // Get release coordinates
+      const endPoint = getCoordinates(event);
 
       context.strokeStyle = color;
       context.lineWidth = radius;
@@ -397,14 +333,10 @@ function PlayScreen() {
 
       const dataURL = await canvasRef.current.toDataURL("image/png");
       socket.emit("sending", dataURL);
-      // Reset startPoint for next straight line
       setStartPoint(null);
     }
   };
   const eraseLine = async (position) => {
-    // const canvas = canvasRef.current;
-    // const context = canvas.getContext('2d');
-    // if (context) {
     const imageData = context.getImageData(
       position.x - radius,
       position.y - radius,
@@ -413,7 +345,6 @@ function PlayScreen() {
     );
     const data = imageData.data;
     for (let i = 0; i < data.length; i += 4) {
-      // Set alpha channel to 0 to erase
       data[i + 3] = 0;
     }
     context.putImageData(imageData, position.x - radius, position.y - radius);
@@ -436,17 +367,6 @@ function PlayScreen() {
     // }
   };
   const fillCanvas = async () => {
-    // const canvas = canvasRef.current;
-    // if (!canvas) {
-    //     console.error('Canvas element not found.');
-    //     return;
-    // }
-
-    // const context = canvas.getContext('2d');
-    // if (!context) {
-    //     console.error('Canvas context not available.');
-    //     return;
-    // }
     if (!currentUserDrawing) return;
 
     context.fillStyle = color; // Set the fill color to the current color
@@ -456,9 +376,6 @@ function PlayScreen() {
   };
 
   const clearCanvas = async () => {
-    // const canvas = canvasRef.current;
-    // const context = canvas.getContext('2d');
-    // if (context) {
     if (!currentUserDrawing) return;
 
     context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
@@ -587,7 +504,7 @@ function PlayScreen() {
               )}
             </div>
           </div>
-          <div className="w-[300px] h-[540px] border border-black flex flex-col-reverse rounded-b-lg p-1">
+          <div className="text-black w-[300px] h-[540px] bg-gray-300 opacity-80 border border-black flex flex-col-reverse rounded-b-lg p-1">
             <form
               onSubmit={(e) => {
                 handleSubmitForm(e);
@@ -764,6 +681,3 @@ function PlayScreen() {
 }
 
 export default PlayScreen;
-
-// className={`${!currentUserDrawing?"cursor-not-allowed":""}`}
-//
